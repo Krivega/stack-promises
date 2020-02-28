@@ -3,7 +3,8 @@
 [![npm](https://img.shields.io/npm/v/stack-promises?style=flat-square)](https://www.npmjs.com/package/stack-promises)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/stack-promises?style=flat-square)
 
-Various abstractions over promises
+A stack of tasks that are executed one by one, but the result is taken from the last.
+Identical functions on the stack (check by reference) are executed only once.
 
 ## Install
 
@@ -21,7 +22,77 @@ yarn add stack-promises
 
 ## Usage
 
-## API
+```js
+import creteStackPromises from 'stack-promises';
+
+const stackPromises = creteStackPromises();
+
+stackPromises.add(() => Promise.resolve(1));
+stackPromises.add(() => Promise.resolve(2));
+
+stackPromises().then(data => {
+  console.log(data); /// 2
+});
+```
+
+### Execute after add
+
+```js
+import creteStackPromises from 'stack-promises';
+
+const stackPromises = creteStackPromises();
+
+stackPromises
+  .add(() => Promise.resolve(1))() // execute
+  .then(data => {
+    console.log(data); // 1
+  });
+stackPromises
+  .add(() => Promise.resolve(2))() // execute
+  .then(data => {
+    console.log(data); // 2
+  });
+
+stackPromises().then(data => {
+  console.log(data); // 2
+});
+```
+
+### Add after execute
+
+```js
+import creteStackPromises, { isPromiseIsNotActualError } from 'stack-promises';
+import delayPromise from 'promise-delay';
+
+const stackPromises = creteStackPromises();
+
+let checkQue = 0;
+const request1 = () =>
+  delayPromise(3000, 1).finally(() => {
+    checkQue += 1;
+  });
+const resultAfter1 = stackPromises.add(request1)();
+
+const request2 = () =>
+  delayPromise(1000, 2).finally(() => {
+    checkQue *= 2;
+  });
+const resultAfter2 = stackPromises.add(request2)();
+
+Promise.allSettled([resultAfter1, resultAfter2]).then(([{ reason }, { value }]) => {
+  isPromiseIsNotActualError(reason); // true
+  value; // 2
+  checkQue; // 2
+  // request1 called 1 times
+  // request2 called 1 times
+});
+```
+
+### Chaining
+
+```js
+stackPromises.add(() => Promise.resolve(1)).add(() => Promise.resolve(2));
+```
 
 ## Run tests
 
