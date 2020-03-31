@@ -1,9 +1,9 @@
 import sequentPromisesList from 'sequent-promises';
 
 const emptyStackError = new Error('Stack is empty');
-export const isEmptyStackError = error => error === emptyStackError;
+export const isEmptyStackError = (error) => error === emptyStackError;
 const promiseIsNotActualError = new Error('Promise is not actual');
-export const isPromiseIsNotActualError = error => error === promiseIsNotActualError;
+export const isPromiseIsNotActualError = (error) => error === promiseIsNotActualError;
 const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise'
 );
@@ -58,13 +58,11 @@ const creteStackPromises = () => {
     return new Promise((resolve, reject) => {
       const finishResultPromise = resolveFinishResultPromise({ resolve, reject });
 
-      runStackPromises()
-        .then(finishResultPromise)
-        .catch(finishResultPromise);
+      runStackPromises().then(finishResultPromise).catch(finishResultPromise);
     });
   };
 
-  const addTaskToStack = task => {
+  const addTaskToStack = (task) => {
     if (typeof task !== 'function') {
       throw notFunctionError;
     }

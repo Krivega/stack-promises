@@ -11,7 +11,7 @@ describe('toLocaleDateString', () => {
   it('empty stack', () => {
     expect.assertions(1);
 
-    return stackPromises().catch(error => {
+    return stackPromises().catch((error) => {
       expect(isEmptyStackError(error)).toBe(true);
     });
   });
@@ -29,7 +29,7 @@ describe('toLocaleDateString', () => {
 
     stackPromises.add(() => delayPromise(1, 1));
 
-    return stackPromises().then(data => {
+    return stackPromises().then((data) => {
       expect(data).toBe(1);
     });
   });
@@ -39,7 +39,7 @@ describe('toLocaleDateString', () => {
 
     stackPromises.add(() => delayPromise(1, 1)).add(() => delayPromise(1, 2));
 
-    return stackPromises().then(data => {
+    return stackPromises().then((data) => {
       expect(data).toBe(2);
     });
   });
@@ -50,7 +50,7 @@ describe('toLocaleDateString', () => {
     stackPromises.add(() => delayPromise(1, 1));
     stackPromises.add(() => delayPromise(1, 2));
 
-    return stackPromises().then(data => {
+    return stackPromises().then((data) => {
       expect(data).toBe(2);
     });
   });
@@ -69,7 +69,7 @@ describe('toLocaleDateString', () => {
     stackPromises.add(request);
     stackPromises.add(request);
 
-    return stackPromises().then(data => {
+    return stackPromises().then((data) => {
       expect(data).toBe(1);
       expect(checkQue).toBe(2);
       expect(request).toHaveBeenCalledTimes(2);
@@ -92,7 +92,7 @@ describe('toLocaleDateString', () => {
       })
     );
 
-    return stackPromises().then(data => {
+    return stackPromises().then((data) => {
       expect(data).toBe(2);
       expect(checkQue).toBe(2);
     });
