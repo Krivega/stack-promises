@@ -35,14 +35,18 @@ const creteStackPromises = () => {
     return promise;
   };
 
-  const resolveFinishResultPromise = ({ resolve, reject }) => ({ results, errors }) => {
-    const sizePromises = results.length + errors.length;
+  const resolveFinishResultPromise = ({ resolve, reject }) => ({ results, isSuccessful }) => {
+    const sizePromises = results.length;
     const sizeStackPromises = promisesStack.length;
 
     if (sizePromises === sizeStackPromises) {
       const lastResult = results[results.length - 1];
 
-      resolve(lastResult);
+      if (isSuccessful) {
+        resolve(lastResult);
+      } else {
+        reject(lastResult);
+      }
     } else {
       reject(promiseIsNotActualError);
     }

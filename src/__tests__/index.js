@@ -124,4 +124,16 @@ describe('toLocaleDateString', () => {
       expect(request2).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('1 promise rejected', () => {
+    expect.assertions(1);
+
+    const error = new Error('error');
+
+    stackPromises.add(() => Promise.reject(error));
+
+    return stackPromises().catch((errorFromStack) => {
+      expect(errorFromStack).toBe(error);
+    });
+  });
 });

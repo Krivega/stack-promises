@@ -5852,10 +5852,10 @@ semver@^7.2.1, semver@^7.3.2:
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.2.tgz#604962b052b81ed0786aae84389ffba70ffd3938"
   integrity sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
 
-sequent-promises@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/sequent-promises/-/sequent-promises-0.1.0.tgz#c89be93d3202e7cdbaad792af30ffcef53e6188a"
-  integrity sha512-uZUWPLVjIoELZ/XAP9m3x3aAu0Lm6JcYlFAjBHiD4TR7zyNM9MY+6XvKAgBTnYX5aqpKcUduDnmHB0yuT3VHFg==
+sequent-promises@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/sequent-promises/-/sequent-promises-0.1.1.tgz#1211b747bb3a65ebadc7433b491c14b4bd2d7a2b"
+  integrity sha512-cMAqlYOtcVkBgn9gDYaKgWLdx9XB8i9wWiRUuz1Mp/gKBxZ+PAHMb2Bv8zFaHEfOo/HbeOXv3NNy+DKjIkXaDg==
   dependencies:
     promise-delay "^2.1.0"
 
