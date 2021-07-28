@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 import delayPromise from 'promise-delay';
 import creteStackPromises, { isEmptyStackError, isPromiseIsNotActualError } from '../index';
 

@@ -24,33 +24,37 @@ const creteStackPromises = () => {
     return undefined;
   };
 
-  const resolveTask = ({ task, index }) => () => {
-    let promise = getPromiseFromTasksStackByTask({ task, index });
+  const resolveTask =
+    ({ task, index }) =>
+    () => {
+      let promise = getPromiseFromTasksStackByTask({ task, index });
 
-    if (!promise) {
-      promise = task();
-      addToTasksStack({ promise, task, index });
-    }
-
-    return promise;
-  };
-
-  const resolveFinishResultPromise = ({ resolve, reject }) => ({ results, isSuccessful }) => {
-    const sizePromises = results.length;
-    const sizeStackPromises = promisesStack.length;
-
-    if (sizePromises === sizeStackPromises) {
-      const lastResult = results[results.length - 1];
-
-      if (isSuccessful) {
-        resolve(lastResult);
-      } else {
-        reject(lastResult);
+      if (!promise) {
+        promise = task();
+        addToTasksStack({ promise, task, index });
       }
-    } else {
-      reject(promiseIsNotActualError);
-    }
-  };
+
+      return promise;
+    };
+
+  const resolveFinishResultPromise =
+    ({ resolve, reject }) =>
+    ({ results, isSuccessful }) => {
+      const sizePromises = results.length;
+      const sizeStackPromises = promisesStack.length;
+
+      if (sizePromises === sizeStackPromises) {
+        const lastResult = results[results.length - 1];
+
+        if (isSuccessful) {
+          resolve(lastResult);
+        } else {
+          reject(lastResult);
+        }
+      } else {
+        reject(promiseIsNotActualError);
+      }
+    };
 
   const runStackPromises = () => sequentPromisesList(promisesStack);
 
