@@ -3,10 +3,10 @@ import delayPromise from 'promise-delay';
 import creteStackPromises, { isEmptyStackError, isPromiseIsNotActualError } from '../index';
 
 describe('toLocaleDateString', () => {
-  let stackPromises;
+  let stackPromises = creteStackPromises<number>();
 
   beforeEach(() => {
-    stackPromises = creteStackPromises();
+    stackPromises = creteStackPromises<number>();
   });
 
   it('empty stack', () => {
@@ -20,15 +20,18 @@ describe('toLocaleDateString', () => {
   it('add not function', () => {
     expect.assertions(1);
 
-    expect(() => stackPromises.add()).toThrow(
-      'stackPromises only works with functions that returns a Promise'
-    );
+    expect(() => {
+      // @ts-ignore
+      return stackPromises.add();
+    }).toThrow('stackPromises only works with functions that returns a Promise');
   });
 
   it('1 promise', () => {
     expect.assertions(1);
 
-    stackPromises.add(() => delayPromise(1, 1));
+    stackPromises.add(() => {
+      return delayPromise(1, 1);
+    });
 
     return stackPromises().then((data) => {
       expect(data).toBe(1);
@@ -38,7 +41,13 @@ describe('toLocaleDateString', () => {
   it('2 promise with chain add: sync', () => {
     expect.assertions(1);
 
-    stackPromises.add(() => delayPromise(1, 1)).add(() => delayPromise(1, 2));
+    stackPromises
+      .add(() => {
+        return delayPromise(1, 1);
+      })
+      .add(() => {
+        return delayPromise(1, 2);
+      });
 
     return stackPromises().then((data) => {
       expect(data).toBe(2);
@@ -48,8 +57,12 @@ describe('toLocaleDateString', () => {
   it('2 promise: sync', () => {
     expect.assertions(1);
 
-    stackPromises.add(() => delayPromise(1, 1));
-    stackPromises.add(() => delayPromise(1, 2));
+    stackPromises.add(() => {
+      return delayPromise(1, 1);
+    });
+    stackPromises.add(() => {
+      return delayPromise(1, 2);
+    });
 
     return stackPromises().then((data) => {
       expect(data).toBe(2);
@@ -61,11 +74,11 @@ describe('toLocaleDateString', () => {
 
     let checkQue = 0;
 
-    const request = jest.fn(() =>
-      delayPromise(1, 1).finally(() => {
+    const request = jest.fn(() => {
+      return delayPromise(1, 1).finally(() => {
         checkQue += 1;
-      })
-    );
+      });
+    });
 
     stackPromises.add(request);
     stackPromises.add(request);
@@ -82,16 +95,16 @@ describe('toLocaleDateString', () => {
 
     let checkQue = 0;
 
-    stackPromises.add(() =>
-      delayPromise(3, 1).finally(() => {
+    stackPromises.add(() => {
+      return delayPromise(3, 1).finally(() => {
         checkQue += 1;
-      })
-    );
-    stackPromises.add(() =>
-      delayPromise(1, 2).finally(() => {
+      });
+    });
+    stackPromises.add(() => {
+      return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
-      })
-    );
+      });
+    });
 
     return stackPromises().then((data) => {
       expect(data).toBe(2);
@@ -103,21 +116,24 @@ describe('toLocaleDateString', () => {
     expect.assertions(5);
 
     let checkQue = 0;
-    const request1 = jest.fn(() =>
-      delayPromise(3, 1).finally(() => {
+    const request1 = jest.fn(() => {
+      return delayPromise(3, 1).finally(() => {
         checkQue += 1;
-      })
-    );
-    const request2 = jest.fn(() =>
-      delayPromise(1, 2).finally(() => {
+      });
+    });
+    const request2 = jest.fn(() => {
+      return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
-      })
-    );
+      });
+    });
 
     const resultAfter1 = stackPromises.add(request1)();
     const resultAfter2 = stackPromises.add(request2)();
 
-    return Promise.allSettled([resultAfter1, resultAfter2]).then(([{ reason }, { value }]) => {
+    return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
+      //@ts-ignore
+      const [{ reason }, { value }] = args;
+
       expect(isPromiseIsNotActualError(reason)).toBe(true);
       expect(value).toBe(2);
       expect(checkQue).toBe(2);
@@ -131,7 +147,9 @@ describe('toLocaleDateString', () => {
 
     const error = new Error('error');
 
-    stackPromises.add(() => Promise.reject(error));
+    stackPromises.add(() => {
+      return Promise.reject(error);
+    });
 
     return stackPromises().catch((errorFromStack) => {
       expect(errorFromStack).toBe(error);
