@@ -1,6 +1,6 @@
 {
   "name": "stack-promises",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "sequentPromises resolves Promises sequentially",
   "keywords": [
     "promise"
