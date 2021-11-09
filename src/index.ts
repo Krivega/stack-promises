@@ -4,7 +4,7 @@ const emptyStackError = new Error('Stack is empty');
 export const isEmptyStackError = (error: Error) => {
   return error === emptyStackError;
 };
-const promiseIsNotActualError = new Error('Promise is not actual');
+export const promiseIsNotActualError = new Error('Promise is not actual');
 export const isPromiseIsNotActualError = (error: Error) => {
   return error === promiseIsNotActualError;
 };
