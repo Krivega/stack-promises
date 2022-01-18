@@ -131,7 +131,7 @@ describe('toLocaleDateString', () => {
     const resultAfter2 = stackPromises.add(request2)();
 
     return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
-      //@ts-ignore
+      // @ts-ignore
       const [{ reason }, { value }] = args;
 
       expect(isPromiseIsNotActualError(reason)).toBe(true);
