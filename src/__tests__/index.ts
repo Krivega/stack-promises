@@ -2,7 +2,7 @@
 import delayPromise from 'promise-delay';
 import creteStackPromises, { isEmptyStackError, isPromiseIsNotActualError } from '../index';
 
-describe('toLocaleDateString', () => {
+describe('creteStackPromises', () => {
   let stackPromises = creteStackPromises<number>();
 
   beforeEach(() => {
@@ -156,7 +156,7 @@ describe('toLocaleDateString', () => {
     });
   });
 
-  it('1 promise: should be disabled', () => {
+  it('1 promise: should be stopped', () => {
     expect.assertions(1);
 
     const error = new Error('Promise is not actual');
@@ -167,14 +167,14 @@ describe('toLocaleDateString', () => {
 
     const promise = stackPromises();
 
-    stackPromises.disable();
+    stackPromises.stop();
 
     return promise.catch((errorFromStack) => {
       expect(errorFromStack).toEqual(error);
     });
   });
 
-  it('2 promises: should be run correctly after disable', async () => {
+  it('2 promises: should be run correctly after stop', async () => {
     expect.assertions(2);
 
     let checkQue = 0;
@@ -192,7 +192,7 @@ describe('toLocaleDateString', () => {
 
     const promise = stackPromises();
 
-    stackPromises.disable();
+    stackPromises.stop();
 
     await promise.catch(() => {
       expect(checkQue).toEqual(0);
