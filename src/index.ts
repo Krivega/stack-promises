@@ -25,6 +25,15 @@ const creteStackPromises = <T = any>() => {
 
   const runnersStack: TRunner[] = [];
   const tasksStack: TTaskObject[] = [];
+  let isCanRunTasks: boolean = false;
+
+  const enableRunTasks = () => {
+    isCanRunTasks = true;
+  };
+
+  const disableRunTasks = () => {
+    isCanRunTasks = false;
+  };
 
   const addToTasksStack = ({ task, promise, index }: TTaskObject) => {
     tasksStack.push({ task, promise, index });
@@ -85,8 +94,14 @@ const creteStackPromises = <T = any>() => {
     };
   };
 
+  const canRunTask = (): boolean => {
+    return isCanRunTasks;
+  };
+
   const runStackPromises = () => {
-    return sequentPromisesList(runnersStack);
+    enableRunTasks();
+
+    return sequentPromisesList(runnersStack, canRunTask);
   };
 
   const result = () => {
@@ -113,7 +128,18 @@ const creteStackPromises = <T = any>() => {
     return result;
   };
 
+  const clearStacks = () => {
+    runnersStack.length = 0;
+    tasksStack.length = 0;
+  };
+
+  const disableRunTasksAndClearStacks = () => {
+    disableRunTasks();
+    clearStacks();
+  };
+
   result.add = addTaskToStack;
+  result.cancel = disableRunTasksAndClearStacks;
 
   return result;
 };

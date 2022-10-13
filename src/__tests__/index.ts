@@ -155,4 +155,22 @@ describe('toLocaleDateString', () => {
       expect(errorFromStack).toBe(error);
     });
   });
+
+  it('1 promise: should be canceled', async () => {
+    expect.assertions(1);
+
+    const error = new Error('Promise is not actual');
+
+    stackPromises.add(() => {
+      return delayPromise(1, 1);
+    });
+
+    const promise = stackPromises();
+
+    stackPromises.cancel();
+
+    await promise.catch((errorFromStack) => {
+      expect(errorFromStack).toEqual(error);
+    });
+  });
 });
