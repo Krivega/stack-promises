@@ -155,4 +155,62 @@ describe('toLocaleDateString', () => {
       expect(errorFromStack).toBe(error);
     });
   });
+
+  it('1 promise: should be disabled', () => {
+    expect.assertions(1);
+
+    const error = new Error('Promise is not actual');
+
+    stackPromises.add(() => {
+      return delayPromise(1, 1);
+    });
+
+    const promise = stackPromises();
+
+    stackPromises.disable();
+
+    return promise.catch((errorFromStack) => {
+      expect(errorFromStack).toEqual(error);
+    });
+  });
+
+  it('2 promises: should be run correctly after disable', async () => {
+    expect.assertions(2);
+
+    let checkQue = 0;
+
+    stackPromises.add(() => {
+      return delayPromise(1, 1).finally(() => {
+        checkQue += 1;
+      });
+    });
+    stackPromises.add(() => {
+      return delayPromise(1, 2).finally(() => {
+        checkQue += 1;
+      });
+    });
+
+    const promise = stackPromises();
+
+    stackPromises.disable();
+
+    await promise.catch(() => {
+      expect(checkQue).toEqual(0);
+    });
+
+    stackPromises.add(() => {
+      return delayPromise(1, 1).finally(() => {
+        checkQue += 1;
+      });
+    });
+    stackPromises.add(() => {
+      return delayPromise(1, 2).finally(() => {
+        checkQue += 1;
+      });
+    });
+
+    return stackPromises().then(() => {
+      expect(checkQue).toEqual(2);
+    });
+  });
 });
