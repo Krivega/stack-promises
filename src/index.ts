@@ -139,7 +139,7 @@ const creteStackPromises = <T = any>() => {
   };
 
   result.add = addTaskToStack;
-  result.cancel = disableRunTasksAndClearStacks;
+  result.disable = disableRunTasksAndClearStacks;
 
   return result;
 };
