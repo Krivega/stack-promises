@@ -158,8 +158,8 @@ describe('creteStackPromises', () => {
       });
     });
 
-    const resultAfter1 = stackPromises.add(request1)();
-    const resultAfter2 = stackPromises.add(request2)();
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
 
     return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
       // @ts-ignore
@@ -167,6 +167,35 @@ describe('creteStackPromises', () => {
 
       expect(isPromiseIsNotActualError(reason)).toBe(true);
       expect(value).toBe(2);
+      expect(checkQue).toBe(2);
+      expect(request1).toHaveBeenCalledTimes(1);
+      expect(request2).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('2 promise: async: noRejectIsNotActual', () => {
+    expect.assertions(5);
+
+    let checkQue = 0;
+    const request1 = jest.fn(() => {
+      return delayPromise(3, 1).finally(() => {
+        checkQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      return delayPromise(1, 2).finally(() => {
+        checkQue *= 2;
+      });
+    });
+
+    stackPromises = creteStackPromises<number>({ noRejectIsNotActual: true });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+
+    return Promise.all([resultAfter1, resultAfter2]).then(([value1, value2]) => {
+      expect(value1).toBe(1);
+      expect(value2).toBe(2);
       expect(checkQue).toBe(2);
       expect(request1).toHaveBeenCalledTimes(1);
       expect(request2).toHaveBeenCalledTimes(1);

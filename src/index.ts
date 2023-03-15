@@ -12,7 +12,11 @@ const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise'
 );
 
-const creteStackPromises = <T = any>() => {
+const creteStackPromises = <T = any>({
+  noRejectIsNotActual = false,
+}: {
+  noRejectIsNotActual?: boolean;
+} = {}) => {
   type TPromise = Promise<T>;
   type TTask = () => TPromise;
   type TRunner = () => TPromise;
@@ -70,18 +74,27 @@ const creteStackPromises = <T = any>() => {
     return ({ results, isSuccessful }: { results: T[]; isSuccessful: boolean }) => {
       const sizePromises = results.length;
       const sizeStackPromises = runnersStack.length;
+      const isActual = sizePromises === sizeStackPromises;
 
-      if (sizePromises === sizeStackPromises) {
+      if (isActual) {
         const lastResult = results[results.length - 1];
 
         if (isSuccessful) {
-          resolve(lastResult);
-        } else {
-          reject(lastResult);
+          return resolve(lastResult);
         }
-      } else {
-        reject(promiseIsNotActualError);
+
+        return reject(lastResult);
       }
+
+      if (noRejectIsNotActual) {
+        const lastResult = results[results.length - 1];
+
+        return resolve(lastResult);
+      }
+
+      reject(promiseIsNotActualError);
+
+      return undefined;
     };
   };
 
