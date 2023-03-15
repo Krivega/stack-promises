@@ -18,7 +18,7 @@
     "email": "mr.krivega@gmail.com",
     "url": "https://krivega.com"
   },
-  "main": "dist/index.umd.js",
+  "main": "dist/index.js",
   "module": "dist/index.es5.js",
   "typings": "dist/index.d.ts",
   "files": [

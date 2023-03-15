@@ -16,7 +16,6 @@ const config = {
   plugins,
   input: pkg['main:src'],
   output: [
-    { file: pkg.main, format: 'umd', sourcemap: true, name: 'sipConnector' },
     { file: pkg.module, format: 'es', sourcemap: true },
   ],
 };
