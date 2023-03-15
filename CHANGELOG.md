@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11](https://github.com/Krivega/stack-promises/compare/v0.0.10...v0.0.11) (2023-03-15)
+
+### Features
+
+- add "run" ([50ef174](https://github.com/Krivega/stack-promises/commit/50ef17431658bfb1bbdccd74956f0a1b9b251af8))
+- add noRejectIsNotActual to params ([c0e2b64](https://github.com/Krivega/stack-promises/commit/c0e2b64a102be249f2629651e5cf78f7a490ad98))
+
 ### [0.0.10](https://github.com/Krivega/stack-promises/compare/v0.0.9...v0.0.10) (2022-10-13)
 
 ### [0.0.9](https://github.com/Krivega/stack-promises/compare/v0.0.8...v0.0.9) (2022-10-13)
