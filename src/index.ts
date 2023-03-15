@@ -129,6 +129,12 @@ const creteStackPromises = <T = any>() => {
     return result;
   };
 
+  const run = (task: TTask) => {
+    addTaskToStack(task);
+
+    return result();
+  };
+
   const clearStacks = () => {
     runnersStack.length = 0;
     tasksStack.length = 0;
@@ -140,6 +146,7 @@ const creteStackPromises = <T = any>() => {
   };
 
   result.add = addTaskToStack;
+  result.run = run;
   result.stop = stop;
 
   return result;

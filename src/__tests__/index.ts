@@ -54,7 +54,7 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise: sync', () => {
+  it('2 promise add: sync', () => {
     expect.assertions(1);
 
     stackPromises.add(() => {
@@ -66,6 +66,37 @@ describe('creteStackPromises', () => {
 
     return stackPromises().then((data) => {
       expect(data).toBe(2);
+    });
+  });
+
+  it('1 promise run', () => {
+    expect.assertions(1);
+
+    return stackPromises
+      .run(() => {
+        return delayPromise(1, 1);
+      })
+      .then((data) => {
+        expect(data).toBe(1);
+      });
+  });
+
+  it('2 promise run: sync', () => {
+    expect.assertions(2);
+
+    const promise1 = stackPromises.run(() => {
+      return delayPromise(1, 1);
+    });
+    const promise2 = stackPromises.run(() => {
+      return delayPromise(1, 2);
+    });
+
+    return Promise.allSettled([promise1, promise2]).then((args) => {
+      // @ts-ignore
+      const [{ reason }, { value }] = args;
+
+      expect(isPromiseIsNotActualError(reason)).toBe(true);
+      expect(value).toBe(2);
     });
   });
 
