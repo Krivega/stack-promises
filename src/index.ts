@@ -1,21 +1,27 @@
 import sequentPromisesList from 'sequent-promises';
 
 const emptyStackError = new Error('Stack is empty');
+
 export const isEmptyStackError = (error: Error) => {
   return error === emptyStackError;
 };
+
 export const promiseIsNotActualError = new Error('Promise is not actual');
+
 export const isPromiseIsNotActualError = (error: Error) => {
   return error === promiseIsNotActualError;
 };
+
 const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise'
 );
 
 const creteStackPromises = <T = any>({
   noRejectIsNotActual = false,
+  noRunIsNotActual = false,
 }: {
   noRejectIsNotActual?: boolean;
+  noRunIsNotActual?: boolean;
 } = {}) => {
   type TPromise = Promise<T>;
   type TTask = () => TPromise;
@@ -23,16 +29,36 @@ const creteStackPromises = <T = any>({
 
   type TTaskObject = {
     task: TTask;
-    promise: TPromise;
+    promise?: TPromise;
     index: number;
   };
 
   const runnersStack: TRunner[] = [];
   const tasksStack: TTaskObject[] = [];
 
-  const addToTasksStack = ({ task, promise, index }: TTaskObject) => {
-    tasksStack.push({ task, promise, index });
+  const addToTasksStack = ({ task, index }: TTaskObject) => {
+    tasksStack.push({ task, index });
   };
+
+  const addPromiseToTasksStack = (
+    promise: TPromise,
+    { task: desiredTask, index: desiredIndex }: TTaskObject
+  ) => {
+    const taskRunner = tasksStack.find(({ task, index }: { task: TTask; index: number }) => {
+      return desiredTask === task && desiredIndex === index;
+    });
+
+    if (!taskRunner) {
+      throw new Error('Task not found');
+    }
+
+    if (taskRunner.promise) {
+      throw new Error('Task is already running');
+    }
+
+    taskRunner.promise = promise;
+  };
+
   const getPromiseFromTasksStackByTask = ({
     task: desiredTask,
     index: desiredIndex,
@@ -51,13 +77,26 @@ const creteStackPromises = <T = any>({
     return undefined;
   };
 
+  const hasLastFromTasksStackByTask = ({ task: desiredTask }: { task: TTask }): boolean => {
+    const lastTaskRunner = tasksStack[tasksStack.length - 1];
+    const isLastTask = lastTaskRunner?.task === desiredTask;
+
+    return isLastTask;
+  };
+
   const resolveRunner = ({ task, index }: { task: TTask; index: number }) => {
+    addToTasksStack({ task, index });
+
     return () => {
       let promise = getPromiseFromTasksStackByTask({ task, index });
 
+      if (!promise && noRunIsNotActual && !hasLastFromTasksStackByTask({ task })) {
+        return Promise.resolve() as TPromise;
+      }
+
       if (!promise) {
         promise = task();
-        addToTasksStack({ promise, task, index });
+        addPromiseToTasksStack(promise, { task, index });
       }
 
       return promise;

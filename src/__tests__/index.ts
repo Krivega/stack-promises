@@ -173,6 +173,135 @@ describe('creteStackPromises', () => {
     });
   });
 
+  it('3 promise: async', () => {
+    expect.assertions(7);
+
+    let checkQue = 0;
+    const request1 = jest.fn(() => {
+      return delayPromise(3, 1).finally(() => {
+        checkQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      return delayPromise(1, 2).finally(() => {
+        checkQue *= 2;
+      });
+    });
+    const request3 = jest.fn(() => {
+      return delayPromise(1, 3).finally(() => {
+        checkQue *= 3;
+      });
+    });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+    const resultAfter3 = stackPromises.run(request3);
+
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
+      const [result1, result2, result3] = args;
+
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
+      // @ts-ignore
+      expect(result3.value).toBe(3);
+      expect(checkQue).toBe(6);
+      expect(request1).toHaveBeenCalledTimes(1);
+      expect(request2).toHaveBeenCalledTimes(1);
+      expect(request3).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('2 promise: async: noRunIsNotActual', () => {
+    expect.assertions(6);
+
+    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+
+    let checkRunQue = 0;
+    let checkResultQue = 0;
+    const request1 = jest.fn(() => {
+      checkRunQue += 1;
+
+      return delayPromise(3, 1).finally(() => {
+        checkResultQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      checkRunQue += 2;
+
+      return delayPromise(1, 2).finally(() => {
+        checkResultQue += 2;
+      });
+    });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+
+    return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
+      const [result1, result2] = args;
+
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
+      // @ts-ignore
+      expect(result2.value).toBe(2);
+      expect(checkRunQue).toBe(2);
+      expect(checkResultQue).toBe(2);
+      expect(request1).toHaveBeenCalledTimes(0);
+      expect(request2).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('3 promise: async: noRunIsNotActual', () => {
+    expect.assertions(8);
+
+    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+
+    let checkRunQue = 0;
+    let checkResultQue = 0;
+    const request1 = jest.fn(() => {
+      checkRunQue += 1;
+
+      return delayPromise(3, 1).finally(() => {
+        checkResultQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      checkRunQue += 2;
+
+      return delayPromise(1, 2).finally(() => {
+        checkResultQue += 2;
+      });
+    });
+    const request3 = jest.fn(() => {
+      checkRunQue += 3;
+
+      return delayPromise(1, 3).finally(() => {
+        checkResultQue += 3;
+      });
+    });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+    const resultAfter3 = stackPromises.run(request3);
+
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
+      const [result1, result2, result3] = args;
+
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
+      // @ts-ignore
+      expect(result3.value).toBe(3);
+      expect(checkRunQue).toBe(3);
+      expect(checkResultQue).toBe(3);
+      expect(request1).toHaveBeenCalledTimes(0);
+      expect(request2).toHaveBeenCalledTimes(0);
+      expect(request3).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('2 promise: async: noRejectIsNotActual', () => {
     expect.assertions(5);
 
@@ -199,6 +328,63 @@ describe('creteStackPromises', () => {
       expect(checkQue).toBe(2);
       expect(request1).toHaveBeenCalledTimes(1);
       expect(request2).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('3 promise: async: noRunIsNotActual and noRejectIsNotActual', () => {
+    expect.assertions(10);
+
+    stackPromises = creteStackPromises<number>({
+      noRunIsNotActual: true,
+      noRejectIsNotActual: true,
+    });
+
+    let checkRunQue = 0;
+    let checkResultQue = 0;
+    const request1 = jest.fn(() => {
+      checkRunQue += 1;
+
+      return delayPromise(3, 1).finally(() => {
+        checkResultQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      checkRunQue += 2;
+
+      return delayPromise(1, 2).finally(() => {
+        checkResultQue += 2;
+      });
+    });
+    const request3 = jest.fn(() => {
+      checkRunQue += 3;
+
+      return delayPromise(1, 3).finally(() => {
+        checkResultQue += 3;
+      });
+    });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+    const resultAfter3 = stackPromises.run(request3);
+
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
+      const [result1, result2, result3] = args;
+
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result1.reason)).toBe(false);
+      // @ts-ignore
+      expect(result1.value).toBe(undefined);
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result2.reason)).toBe(false);
+      // @ts-ignore
+      expect(result2.value).toBe(undefined);
+      // @ts-ignore
+      expect(result3.value).toBe(3);
+      expect(checkRunQue).toBe(3);
+      expect(checkResultQue).toBe(3);
+      expect(request1).toHaveBeenCalledTimes(0);
+      expect(request2).toHaveBeenCalledTimes(0);
+      expect(request3).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -271,6 +457,58 @@ describe('creteStackPromises', () => {
 
     return stackPromises().then(() => {
       expect(checkQue).toEqual(2);
+    });
+  });
+
+  it('3 promise: async: noRunIsNotActual: stop', () => {
+    expect.assertions(8);
+
+    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+
+    let checkRunQue = 0;
+    let checkResultQue = 0;
+    const request1 = jest.fn(() => {
+      checkRunQue += 1;
+
+      return delayPromise(3, 1).finally(() => {
+        checkResultQue += 1;
+      });
+    });
+    const request2 = jest.fn(() => {
+      checkRunQue += 2;
+
+      return delayPromise(1, 2).finally(() => {
+        checkResultQue += 2;
+      });
+    });
+    const request3 = jest.fn(() => {
+      checkRunQue += 3;
+
+      return delayPromise(1, 3).finally(() => {
+        checkResultQue += 3;
+      });
+    });
+
+    const resultAfter1 = stackPromises.run(request1);
+    const resultAfter2 = stackPromises.run(request2);
+    const resultAfter3 = stackPromises.run(request3);
+
+    stackPromises.stop();
+
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
+      const [result1, result2, result3] = args;
+
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
+      // @ts-ignore
+      expect(isPromiseIsNotActualError(result3.reason)).toBe(true);
+      expect(checkRunQue).toBe(0);
+      expect(checkResultQue).toBe(0);
+      expect(request1).toHaveBeenCalledTimes(0);
+      expect(request2).toHaveBeenCalledTimes(0);
+      expect(request3).toHaveBeenCalledTimes(0);
     });
   });
 });
