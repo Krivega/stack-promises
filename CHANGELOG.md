@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.13](https://github.com/Krivega/stack-promises/compare/v0.0.12...v0.0.13) (2023-03-22)
+
+### Features
+
+- add isActual to params of task ([e8f99dd](https://github.com/Krivega/stack-promises/commit/e8f99dd977b64b5622543b0787accec5666881ba))
+- add noRunIsNotActual to params ([e9e3a23](https://github.com/Krivega/stack-promises/commit/e9e3a23662e9f75e4cbd013acecad5f1e88e0c09))
+
 ### [0.0.12](https://github.com/Krivega/stack-promises/compare/v0.0.11...v0.0.12) (2023-03-15)
 
 ### [0.0.11](https://github.com/Krivega/stack-promises/compare/v0.0.10...v0.0.11) (2023-03-15)
