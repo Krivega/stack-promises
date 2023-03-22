@@ -24,7 +24,7 @@ const creteStackPromises = <T = any>({
   noRunIsNotActual?: boolean;
 } = {}) => {
   type TPromise = Promise<T>;
-  type TTask = () => TPromise;
+  type TTask = ({ isActual }: { isActual: boolean }) => TPromise;
   type TRunner = () => TPromise;
 
   type TTaskObject = {
@@ -89,13 +89,14 @@ const creteStackPromises = <T = any>({
 
     return () => {
       let promise = getPromiseFromTasksStackByTask({ task, index });
+      const isActual = hasLastFromTasksStackByTask({ task });
 
-      if (!promise && noRunIsNotActual && !hasLastFromTasksStackByTask({ task })) {
+      if (!promise && noRunIsNotActual && !isActual) {
         return Promise.resolve() as TPromise;
       }
 
       if (!promise) {
-        promise = task();
+        promise = task({ isActual });
         addPromiseToTasksStack(promise, { task, index });
       }
 
