@@ -1,6 +1,29 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable jest/no-conditional-expect */
-import delayPromise from 'promise-delay';
 import creteStackPromises, { isEmptyStackError, isPromiseIsNotActualError } from '../index';
+
+const noop = () => {};
+const deferred = <T = void>() => {
+  let resolveDeferred: (data: T) => void = noop;
+  let rejectDeferred: (error: Error) => void = noop;
+
+  const promise = new Promise<T>((resolve, reject) => {
+    resolveDeferred = resolve;
+    rejectDeferred = reject;
+  });
+
+  return { promise, resolve: resolveDeferred, reject: rejectDeferred };
+};
+
+const delayPromise = async <T = void>(timeout: number, data: T): Promise<T> => {
+  const { promise, resolve } = deferred<T>();
+
+  setTimeout(() => {
+    resolve(data);
+  }, timeout);
+
+  return promise;
+};
 
 describe('creteStackPromises', () => {
   let stackPromises = creteStackPromises<number>();
@@ -9,10 +32,10 @@ describe('creteStackPromises', () => {
     stackPromises = creteStackPromises<number>();
   });
 
-  it('empty stack', () => {
+  it('empty stack', async () => {
     expect.assertions(1);
 
-    return stackPromises().catch((error) => {
+    return stackPromises().catch((error: Error) => {
       expect(isEmptyStackError(error)).toBe(true);
     });
   });
@@ -21,15 +44,15 @@ describe('creteStackPromises', () => {
     expect.assertions(1);
 
     expect(() => {
-      // @ts-ignore
+      // @ts-expect-error
       return stackPromises.add();
     }).toThrow('stackPromises only works with functions that returns a Promise');
   });
 
-  it('1 promise', () => {
+  it('1 promise', async () => {
     expect.assertions(1);
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 1);
     });
 
@@ -38,14 +61,14 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise with chain add: sync', () => {
+  it('2 promise with chain add: sync', async () => {
     expect.assertions(1);
 
     stackPromises
-      .add(() => {
+      .add(async () => {
         return delayPromise(1, 1);
       })
-      .add(() => {
+      .add(async () => {
         return delayPromise(1, 2);
       });
 
@@ -54,13 +77,13 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise add: sync', () => {
+  it('2 promise add: sync', async () => {
     expect.assertions(1);
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 1);
     });
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 2);
     });
 
@@ -69,11 +92,11 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('1 promise run', () => {
+  it('1 promise run', async () => {
     expect.assertions(1);
 
     return stackPromises
-      .run(() => {
+      .run(async () => {
         return delayPromise(1, 1);
       })
       .then((data) => {
@@ -81,31 +104,31 @@ describe('creteStackPromises', () => {
       });
   });
 
-  it('2 promise run: sync', () => {
+  it('2 promise run: sync', async () => {
     expect.assertions(2);
 
-    const promise1 = stackPromises.run(() => {
+    const promise1 = stackPromises.run(async () => {
       return delayPromise(1, 1);
     });
-    const promise2 = stackPromises.run(() => {
+    const promise2 = stackPromises.run(async () => {
       return delayPromise(1, 2);
     });
 
-    return Promise.allSettled([promise1, promise2]).then((args) => {
-      // @ts-ignore
-      const [{ reason }, { value }] = args;
+    return Promise.allSettled([promise1, promise2]).then((arguments_) => {
+      // @ts-expect-error
+      const [{ reason }, { value }] = arguments_;
 
       expect(isPromiseIsNotActualError(reason)).toBe(true);
       expect(value).toBe(2);
     });
   });
 
-  it('2 equal promise: sync', () => {
+  it('2 equal promise: sync', async () => {
     expect.assertions(3);
 
     let checkQue = 0;
 
-    const request = jest.fn(() => {
+    const request = jest.fn(async () => {
       return delayPromise(1, 1).finally(() => {
         checkQue += 1;
       });
@@ -121,17 +144,17 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise reversed: sync', () => {
+  it('2 promise reversed: sync', async () => {
     expect.assertions(2);
 
     let checkQue = 0;
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(3, 1).finally(() => {
         checkQue += 1;
       });
     });
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
       });
@@ -143,16 +166,16 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise: async', () => {
+  it('2 promise: async', async () => {
     expect.assertions(5);
 
     let checkQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       return delayPromise(3, 1).finally(() => {
         checkQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
       });
@@ -161,9 +184,9 @@ describe('creteStackPromises', () => {
     const resultAfter1 = stackPromises.run(request1);
     const resultAfter2 = stackPromises.run(request2);
 
-    return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
-      // @ts-ignore
-      const [{ reason }, { value }] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2]).then((arguments_) => {
+      // @ts-expect-error
+      const [{ reason }, { value }] = arguments_;
 
       expect(isPromiseIsNotActualError(reason)).toBe(true);
       expect(value).toBe(2);
@@ -173,21 +196,21 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('3 promise: async', () => {
+  it('3 promise: async', async () => {
     expect.assertions(7);
 
     let checkQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       return delayPromise(3, 1).finally(() => {
         checkQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
       });
     });
-    const request3 = jest.fn(() => {
+    const request3 = jest.fn(async () => {
       return delayPromise(1, 3).finally(() => {
         checkQue *= 3;
       });
@@ -197,14 +220,14 @@ describe('creteStackPromises', () => {
     const resultAfter2 = stackPromises.run(request2);
     const resultAfter3 = stackPromises.run(request3);
 
-    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
-      const [result1, result2, result3] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((arguments_) => {
+      const [result1, result2, result3] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result3.value).toBe(3);
       expect(checkQue).toBe(6);
       expect(request1).toHaveBeenCalledTimes(1);
@@ -213,21 +236,21 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise: async: noRunIsNotActual', () => {
+  it('2 promise: async: noRunIsNotActual', async () => {
     expect.assertions(6);
 
     stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       checkRunQue += 1;
 
       return delayPromise(3, 1).finally(() => {
         checkResultQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       checkRunQue += 2;
 
       return delayPromise(1, 2).finally(() => {
@@ -238,12 +261,12 @@ describe('creteStackPromises', () => {
     const resultAfter1 = stackPromises.run(request1);
     const resultAfter2 = stackPromises.run(request2);
 
-    return Promise.allSettled([resultAfter1, resultAfter2]).then((args) => {
-      const [result1, result2] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2]).then((arguments_) => {
+      const [result1, result2] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result2.value).toBe(2);
       expect(checkRunQue).toBe(2);
       expect(checkResultQue).toBe(2);
@@ -252,28 +275,28 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('3 promise: async: noRunIsNotActual', () => {
+  it('3 promise: async: noRunIsNotActual', async () => {
     expect.assertions(8);
 
     stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       checkRunQue += 1;
 
       return delayPromise(3, 1).finally(() => {
         checkResultQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       checkRunQue += 2;
 
       return delayPromise(1, 2).finally(() => {
         checkResultQue += 2;
       });
     });
-    const request3 = jest.fn(() => {
+    const request3 = jest.fn(async () => {
       checkRunQue += 3;
 
       return delayPromise(1, 3).finally(() => {
@@ -285,14 +308,14 @@ describe('creteStackPromises', () => {
     const resultAfter2 = stackPromises.run(request2);
     const resultAfter3 = stackPromises.run(request3);
 
-    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
-      const [result1, result2, result3] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((arguments_) => {
+      const [result1, result2, result3] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result3.value).toBe(3);
       expect(checkRunQue).toBe(3);
       expect(checkResultQue).toBe(3);
@@ -302,26 +325,26 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('3 promise: async: pass isNotActual', () => {
+  it('3 promise: async: pass isNotActual', async () => {
     expect.assertions(11);
 
     let checkRunQue = 0;
     let checkResultQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       checkRunQue += 1;
 
       return delayPromise(3, 1).finally(() => {
         checkResultQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       checkRunQue += 2;
 
       return delayPromise(1, 2).finally(() => {
         checkResultQue += 2;
       });
     });
-    const request3 = jest.fn(() => {
+    const request3 = jest.fn(async () => {
       checkRunQue += 3;
 
       return delayPromise(1, 3).finally(() => {
@@ -333,14 +356,14 @@ describe('creteStackPromises', () => {
     const resultAfter2 = stackPromises.run(request2);
     const resultAfter3 = stackPromises.run(request3);
 
-    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
-      const [result1, result2, result3] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((arguments_) => {
+      const [result1, result2, result3] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result3.value).toBe(3);
       expect(checkRunQue).toBe(6);
       expect(checkResultQue).toBe(6);
@@ -353,16 +376,16 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('2 promise: async: noRejectIsNotActual', () => {
+  it('2 promise: async: noRejectIsNotActual', async () => {
     expect.assertions(5);
 
     let checkQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       return delayPromise(3, 1).finally(() => {
         checkQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue *= 2;
       });
@@ -382,7 +405,7 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('3 promise: async: noRunIsNotActual and noRejectIsNotActual', () => {
+  it('3 promise: async: noRunIsNotActual and noRejectIsNotActual', async () => {
     expect.assertions(10);
 
     stackPromises = creteStackPromises<number>({
@@ -392,21 +415,21 @@ describe('creteStackPromises', () => {
 
     let checkRunQue = 0;
     let checkResultQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       checkRunQue += 1;
 
       return delayPromise(3, 1).finally(() => {
         checkResultQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       checkRunQue += 2;
 
       return delayPromise(1, 2).finally(() => {
         checkResultQue += 2;
       });
     });
-    const request3 = jest.fn(() => {
+    const request3 = jest.fn(async () => {
       checkRunQue += 3;
 
       return delayPromise(1, 3).finally(() => {
@@ -418,18 +441,18 @@ describe('creteStackPromises', () => {
     const resultAfter2 = stackPromises.run(request2);
     const resultAfter3 = stackPromises.run(request3);
 
-    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
-      const [result1, result2, result3] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((arguments_) => {
+      const [result1, result2, result3] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(false);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result1.value).toBe(undefined);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result2.reason)).toBe(false);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result2.value).toBe(undefined);
-      // @ts-ignore
+      // @ts-expect-error
       expect(result3.value).toBe(3);
       expect(checkRunQue).toBe(3);
       expect(checkResultQue).toBe(3);
@@ -439,26 +462,26 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('1 promise rejected', () => {
+  it('1 promise rejected', async () => {
     expect.assertions(1);
 
     const error = new Error('error');
 
-    stackPromises.add(() => {
-      return Promise.reject(error);
+    stackPromises.add(async () => {
+      throw error;
     });
 
-    return stackPromises().catch((errorFromStack) => {
-      expect(errorFromStack).toBe(error);
+    return stackPromises().catch((error_) => {
+      expect(error_).toBe(error);
     });
   });
 
-  it('1 promise: should be stopped', () => {
+  it('1 promise: should be stopped', async () => {
     expect.assertions(1);
 
     const error = new Error('Promise is not actual');
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 1);
     });
 
@@ -466,8 +489,8 @@ describe('creteStackPromises', () => {
 
     stackPromises.stop();
 
-    return promise.catch((errorFromStack) => {
-      expect(errorFromStack).toEqual(error);
+    return promise.catch((error_) => {
+      expect(error_).toEqual(error);
     });
   });
 
@@ -476,12 +499,12 @@ describe('creteStackPromises', () => {
 
     let checkQue = 0;
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 1).finally(() => {
         checkQue += 1;
       });
     });
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue += 1;
       });
@@ -495,12 +518,12 @@ describe('creteStackPromises', () => {
       expect(checkQue).toEqual(0);
     });
 
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 1).finally(() => {
         checkQue += 1;
       });
     });
-    stackPromises.add(() => {
+    stackPromises.add(async () => {
       return delayPromise(1, 2).finally(() => {
         checkQue += 1;
       });
@@ -511,28 +534,28 @@ describe('creteStackPromises', () => {
     });
   });
 
-  it('3 promise: async: noRunIsNotActual: stop', () => {
+  it('3 promise: async: noRunIsNotActual: stop', async () => {
     expect.assertions(8);
 
     stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
-    const request1 = jest.fn(() => {
+    const request1 = jest.fn(async () => {
       checkRunQue += 1;
 
       return delayPromise(3, 1).finally(() => {
         checkResultQue += 1;
       });
     });
-    const request2 = jest.fn(() => {
+    const request2 = jest.fn(async () => {
       checkRunQue += 2;
 
       return delayPromise(1, 2).finally(() => {
         checkResultQue += 2;
       });
     });
-    const request3 = jest.fn(() => {
+    const request3 = jest.fn(async () => {
       checkRunQue += 3;
 
       return delayPromise(1, 3).finally(() => {
@@ -546,14 +569,14 @@ describe('creteStackPromises', () => {
 
     stackPromises.stop();
 
-    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((args) => {
-      const [result1, result2, result3] = args;
+    return Promise.allSettled([resultAfter1, resultAfter2, resultAfter3]).then((arguments_) => {
+      const [result1, result2, result3] = arguments_;
 
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result1.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result2.reason)).toBe(true);
-      // @ts-ignore
+      // @ts-expect-error
       expect(isPromiseIsNotActualError(result3.reason)).toBe(true);
       expect(checkRunQue).toBe(0);
       expect(checkResultQue).toBe(0);

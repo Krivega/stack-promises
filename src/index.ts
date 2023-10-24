@@ -13,10 +13,10 @@ export const isPromiseIsNotActualError = (error: Error) => {
 };
 
 const notFunctionError = new Error(
-  'stackPromises only works with functions that returns a Promise'
+  'stackPromises only works with functions that returns a Promise',
 );
 
-const creteStackPromises = <T = any>({
+const creteStackPromises = <T>({
   noRejectIsNotActual = false,
   noRunIsNotActual = false,
 }: {
@@ -42,7 +42,7 @@ const creteStackPromises = <T = any>({
 
   const addPromiseToTasksStack = (
     promise: TPromise,
-    { task: desiredTask, index: desiredIndex }: TTaskObject
+    { task: desiredTask, index: desiredIndex }: TTaskObject,
   ) => {
     const taskRunner = tasksStack.find(({ task, index }: { task: TTask; index: number }) => {
       return desiredTask === task && desiredIndex === index;
@@ -65,6 +65,7 @@ const creteStackPromises = <T = any>({
   }: {
     task: TTask;
     index: number;
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
   }) => {
     const taskRunner = tasksStack.find(({ task, index }: { task: TTask; index: number }) => {
       return desiredTask === task && desiredIndex === index;
@@ -74,11 +75,12 @@ const creteStackPromises = <T = any>({
       return taskRunner.promise;
     }
 
+    // eslint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   };
 
   const hasLastFromTasksStackByTask = ({ task: desiredTask }: { task: TTask }): boolean => {
-    const lastTaskRunner = tasksStack[tasksStack.length - 1];
+    const lastTaskRunner = tasksStack.at(-1);
     const isLastTask = lastTaskRunner?.task === desiredTask;
 
     return isLastTask;
@@ -87,7 +89,7 @@ const creteStackPromises = <T = any>({
   const resolveRunner = ({ task, index }: { task: TTask; index: number }) => {
     addToTasksStack({ task, index });
 
-    return () => {
+    return async () => {
       let promise = getPromiseFromTasksStackByTask({ task, index });
       const isActual = hasLastFromTasksStackByTask({ task });
 
@@ -109,7 +111,7 @@ const creteStackPromises = <T = any>({
     reject,
   }: {
     resolve: (result: T) => void;
-    reject: (result: T | Error) => void;
+    reject: (result: Error | T) => void;
   }) => {
     return ({ results, isSuccessful }: { results: T[]; isSuccessful: boolean }) => {
       const sizePromises = results.length;
@@ -117,28 +119,32 @@ const creteStackPromises = <T = any>({
       const isActual = sizePromises === sizeStackPromises;
 
       if (isActual) {
-        const lastResult = results[results.length - 1];
+        const lastResult = results.at(-1);
 
         if (isSuccessful) {
-          return resolve(lastResult);
+          resolve(lastResult as T);
+
+          return;
         }
 
-        return reject(lastResult);
+        reject(lastResult as T);
+
+        return;
       }
 
       if (noRejectIsNotActual) {
-        const lastResult = results[results.length - 1];
+        const lastResult = results.at(-1);
 
-        return resolve(lastResult);
+        resolve(lastResult as T);
+
+        return;
       }
 
       reject(promiseIsNotActualError);
-
-      return undefined;
     };
   };
 
-  let isCanRunTasks: boolean = false;
+  let isCanRunTasks = false;
 
   const enableRunTasks = () => {
     isCanRunTasks = true;
@@ -152,18 +158,18 @@ const creteStackPromises = <T = any>({
     return isCanRunTasks;
   };
 
-  const runStackPromises = () => {
+  const runStackPromises = async () => {
     enableRunTasks();
 
     return sequentPromisesList(runnersStack, canRunTask);
   };
 
-  const result = () => {
+  const result = async () => {
     if (runnersStack.length === 0) {
-      return Promise.reject(emptyStackError);
+      throw emptyStackError;
     }
 
-    return new Promise<T | Error>((resolve, reject) => {
+    return new Promise<Error | T>((resolve, reject) => {
       const finishResultPromise = resolveFinishResultPromise({ resolve, reject });
 
       runStackPromises().then(finishResultPromise).catch(finishResultPromise);
@@ -182,7 +188,7 @@ const creteStackPromises = <T = any>({
     return result;
   };
 
-  const run = (task: TTask) => {
+  const run = async (task: TTask) => {
     addTaskToStack(task);
 
     return result();
