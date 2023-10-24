@@ -169,7 +169,7 @@ const creteStackPromises = <T>({
       throw emptyStackError;
     }
 
-    return new Promise<Error | T>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       const finishResultPromise = resolveFinishResultPromise({ resolve, reject });
 
       runStackPromises().then(finishResultPromise).catch(finishResultPromise);
