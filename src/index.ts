@@ -2,6 +2,10 @@ import sequentPromisesList from 'sequent-promises';
 
 const emptyStackError = new Error('Stack is empty');
 
+const getLastItem = <T>(stack: T[]): T | undefined => {
+  return stack[stack.length - 1];
+};
+
 export const isEmptyStackError = (error: Error) => {
   return error === emptyStackError;
 };
@@ -80,7 +84,7 @@ const creteStackPromises = <T>({
   };
 
   const hasLastFromTasksStackByTask = ({ task: desiredTask }: { task: TTask }): boolean => {
-    const lastTaskRunner = tasksStack.at(-1);
+    const lastTaskRunner = getLastItem(tasksStack);
     const isLastTask = lastTaskRunner?.task === desiredTask;
 
     return isLastTask;
@@ -119,7 +123,7 @@ const creteStackPromises = <T>({
       const isActual = sizePromises === sizeStackPromises;
 
       if (isActual) {
-        const lastResult = results.at(-1);
+        const lastResult = getLastItem(results);
 
         if (isSuccessful) {
           resolve(lastResult as T);
@@ -133,7 +137,7 @@ const creteStackPromises = <T>({
       }
 
       if (noRejectIsNotActual) {
-        const lastResult = results.at(-1);
+        const lastResult = getLastItem(results);
 
         resolve(lastResult as T);
 

@@ -171,6 +171,7 @@
     "@typescript-eslint/no-magic-numbers": "off",
     "no-undef-init": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/init-declarations": "off"
+    "@typescript-eslint/init-declarations": "off",
+    "unicorn/prefer-at": "off"
   }
 }
