@@ -20,7 +20,7 @@ const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise',
 );
 
-export const creteStackPromises = <T>({
+export const createStackPromises = <T>({
   noRejectIsNotActual = false,
   noRunIsNotActual = false,
 }: {

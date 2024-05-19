@@ -2,7 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable jest/no-conditional-expect */
-import { creteStackPromises, isEmptyStackError, isPromiseIsNotActualError } from '../index';
+import { createStackPromises, isEmptyStackError, isPromiseIsNotActualError } from '../index';
 
 const noop = () => {};
 const deferred = <T = void>() => {
@@ -27,11 +27,11 @@ const delayPromise = async <T = void>(timeout: number, data: T): Promise<T> => {
   return promise;
 };
 
-describe('creteStackPromises', () => {
-  let stackPromises = creteStackPromises<number>();
+describe('createStackPromises', () => {
+  let stackPromises = createStackPromises<number>();
 
   beforeEach(() => {
-    stackPromises = creteStackPromises<number>();
+    stackPromises = createStackPromises<number>();
   });
 
   it('empty stack', async () => {
@@ -241,7 +241,7 @@ describe('creteStackPromises', () => {
   it('2 promise: async: noRunIsNotActual', async () => {
     expect.assertions(6);
 
-    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+    stackPromises = createStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
@@ -280,7 +280,7 @@ describe('creteStackPromises', () => {
   it('3 promise: async: noRunIsNotActual', async () => {
     expect.assertions(8);
 
-    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+    stackPromises = createStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
@@ -393,7 +393,7 @@ describe('creteStackPromises', () => {
       });
     });
 
-    stackPromises = creteStackPromises<number>({ noRejectIsNotActual: true });
+    stackPromises = createStackPromises<number>({ noRejectIsNotActual: true });
 
     const resultAfter1 = stackPromises.run(request1);
     const resultAfter2 = stackPromises.run(request2);
@@ -410,7 +410,7 @@ describe('creteStackPromises', () => {
   it('3 promise: async: noRunIsNotActual and noRejectIsNotActual', async () => {
     expect.assertions(10);
 
-    stackPromises = creteStackPromises<number>({
+    stackPromises = createStackPromises<number>({
       noRunIsNotActual: true,
       noRejectIsNotActual: true,
     });
@@ -539,7 +539,7 @@ describe('creteStackPromises', () => {
   it('3 promise: async: noRunIsNotActual: stop', async () => {
     expect.assertions(8);
 
-    stackPromises = creteStackPromises<number>({ noRunIsNotActual: true });
+    stackPromises = createStackPromises<number>({ noRunIsNotActual: true });
 
     let checkRunQue = 0;
     let checkResultQue = 0;
