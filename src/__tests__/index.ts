@@ -1,6 +1,8 @@
+/// <reference types="jest" />
+
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable jest/no-conditional-expect */
-import creteStackPromises, { isEmptyStackError, isPromiseIsNotActualError } from '../index';
+import { creteStackPromises, isEmptyStackError, isPromiseIsNotActualError } from '../index';
 
 const noop = () => {};
 const deferred = <T = void>() => {
@@ -35,8 +37,8 @@ describe('creteStackPromises', () => {
   it('empty stack', async () => {
     expect.assertions(1);
 
-    return stackPromises().catch((error: Error) => {
-      expect(isEmptyStackError(error)).toBe(true);
+    return stackPromises().catch((error: unknown) => {
+      expect(isEmptyStackError(error as Error)).toBe(true);
     });
   });
 
@@ -471,7 +473,7 @@ describe('creteStackPromises', () => {
       throw error;
     });
 
-    return stackPromises().catch((error_) => {
+    return stackPromises().catch((error_: unknown) => {
       expect(error_).toBe(error);
     });
   });
@@ -489,7 +491,7 @@ describe('creteStackPromises', () => {
 
     stackPromises.stop();
 
-    return promise.catch((error_) => {
+    return promise.catch((error_: unknown) => {
       expect(error_).toEqual(error);
     });
   });

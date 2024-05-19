@@ -1,4 +1,4 @@
-import sequentPromisesList from 'sequent-promises';
+import { sequentPromises } from 'sequent-promises';
 
 const emptyStackError = new Error('Stack is empty');
 
@@ -20,7 +20,7 @@ const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise',
 );
 
-const creteStackPromises = <T>({
+export const creteStackPromises = <T>({
   noRejectIsNotActual = false,
   noRunIsNotActual = false,
 }: {
@@ -165,7 +165,7 @@ const creteStackPromises = <T>({
   const runStackPromises = async () => {
     enableRunTasks();
 
-    return sequentPromisesList(runnersStack, canRunTask);
+    return sequentPromises(runnersStack, canRunTask);
   };
 
   const result = async () => {
@@ -176,7 +176,11 @@ const creteStackPromises = <T>({
     return new Promise<T>((resolve, reject) => {
       const finishResultPromise = resolveFinishResultPromise({ resolve, reject });
 
-      runStackPromises().then(finishResultPromise).catch(finishResultPromise);
+      runStackPromises()
+        .then(finishResultPromise)
+        .catch((error: unknown) => {
+          finishResultPromise(error as { results: T[]; isSuccessful: boolean });
+        });
     });
   };
 
@@ -214,5 +218,3 @@ const creteStackPromises = <T>({
 
   return result;
 };
-
-export default creteStackPromises;
