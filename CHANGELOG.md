@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/Krivega/stack-promises/compare/v2.0.1...v2.0.2) (2024-05-21)
+
+### Bug Fixes
+
+- exports cjs ([1a14890](https://github.com/Krivega/stack-promises/commit/1a14890d23b8836a29d807a73198eb172b4c30b7))
+
 ### [2.0.1](https://github.com/Krivega/stack-promises/compare/v2.0.0...v2.0.1) (2024-05-19)
 
 ### Bug Fixes
