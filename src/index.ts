@@ -20,6 +20,13 @@ const notFunctionError = new Error(
   'stackPromises only works with functions that returns a Promise',
 );
 
+type TGRunStack<T, P> = {
+  (): P;
+  add: (task: T) => TGRunStack<T, P>;
+  run: (task: T) => P;
+  stop: () => void;
+};
+
 export const createStackPromises = <T>({
   noRejectIsNotActual = false,
   noRunIsNotActual = false,
@@ -30,6 +37,7 @@ export const createStackPromises = <T>({
   type TPromise = Promise<T>;
   type TTask = ({ isActual }: { isActual: boolean }) => TPromise;
   type TRunner = () => TPromise;
+  type TRunStack = TGRunStack<TTask, Promise<T>>;
 
   type TTaskObject = {
     task: TTask;
@@ -79,7 +87,6 @@ export const createStackPromises = <T>({
       return taskRunner.promise;
     }
 
-    // eslint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   };
 
@@ -168,7 +175,7 @@ export const createStackPromises = <T>({
     return sequentPromises(runnersStack, canRunTask);
   };
 
-  const result = async () => {
+  const runStack = (async () => {
     if (runnersStack.length === 0) {
       throw emptyStackError;
     }
@@ -182,7 +189,7 @@ export const createStackPromises = <T>({
           finishResultPromise(error as { results: T[]; isSuccessful: boolean });
         });
     });
-  };
+  }) as TRunStack;
 
   const addTaskToStack = (task: TTask) => {
     if (typeof task !== 'function') {
@@ -193,13 +200,13 @@ export const createStackPromises = <T>({
 
     runnersStack.push(resolveRunner({ task, index }));
 
-    return result;
+    return runStack;
   };
 
   const run = async (task: TTask) => {
     addTaskToStack(task);
 
-    return result();
+    return runStack();
   };
 
   const clearStacks = () => {
@@ -212,9 +219,9 @@ export const createStackPromises = <T>({
     clearStacks();
   };
 
-  result.add = addTaskToStack;
-  result.run = run;
-  result.stop = stop;
+  runStack.add = addTaskToStack;
+  runStack.run = run;
+  runStack.stop = stop;
 
-  return result;
+  return runStack;
 };
