@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.4](https://github.com/Krivega/stack-promises/compare/v2.0.3...v2.0.4) (2025-09-23)
+
+### Bug Fixes
+
+- change type param isPromiseIsNotActualError ([cd92d0b](https://github.com/Krivega/stack-promises/commit/cd92d0b7e3becefa7540bd8ec6e5ee623e7dd5b5))
+
 ### [2.0.3](https://github.com/Krivega/stack-promises/compare/v2.0.2...v2.0.3) (2025-01-28)
 
 ### [2.0.2](https://github.com/Krivega/stack-promises/compare/v2.0.1...v2.0.2) (2024-05-21)
