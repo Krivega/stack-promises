@@ -12,7 +12,7 @@ export const isEmptyStackError = (error: Error) => {
 
 export const promiseIsNotActualError = new Error('Promise is not actual');
 
-export const isPromiseIsNotActualError = (error: Error) => {
+export const isPromiseIsNotActualError = (error: unknown) => {
   return error === promiseIsNotActualError;
 };
 
