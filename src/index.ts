@@ -3,6 +3,7 @@ import { sequentPromises } from 'sequent-promises';
 const emptyStackError = new Error('Stack is empty');
 
 const getLastItem = <T>(stack: T[]): T | undefined => {
+  // eslint-disable-next-line unicorn/prefer-at
   return stack[stack.length - 1];
 };
 

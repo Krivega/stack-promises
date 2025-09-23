@@ -2,7 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "types": ["vite/client", "node"]
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client", "node", "jest", "./src/global.d.ts"]
   },
-  "include": ["src"]
+  "include": ["src", "eslint.config.ts", "jest.config.ts", "vite.config.ts"]
 }

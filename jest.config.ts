@@ -30,6 +30,14 @@ const jestConfig: JestConfigWithTsJest = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  transform: {
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        diagnostics: false,
+      },
+    ],
+  },
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.[jt]s?(x)',
     '<rootDir>/src/**/?(*.)+(spec|test).[jt]s?(x)',

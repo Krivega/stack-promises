@@ -1,6 +1,5 @@
 /// <reference types="jest" />
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable jest/no-conditional-expect */
 import { createStackPromises, isEmptyStackError, isPromiseIsNotActualError } from '../index';
 
